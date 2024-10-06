@@ -193,6 +193,7 @@ M.clear_cache = function()
     local cache_dir = get_cache_dir()
     if cache_dir:exists() then
         cache_dir:rm({ recursive = true })
+        M.queue_notification('Cache cleared successfully', nil, 'Utils')
     end
 end
 
