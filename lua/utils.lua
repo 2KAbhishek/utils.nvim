@@ -1,18 +1,18 @@
----@class Job
----@field new fun(self: Job, config: table): Job
----@field start fun(self: Job): Job
----@field result fun(self: Job): string[]
+---@class job
+---@field new fun(self: job, config: table): job
+---@field start fun(self: job): job
+---@field result fun(self: job): string[]
 
----@class Path
----@field new fun(self: Path, ...): Path
----@field exists fun(self: Path): boolean
----@field read fun(self: Path): string
----@field write fun(self: Path, content: string, mode: string): nil
----@field mkdir fun(self: Path, opts: table): nil
----@field joinpath fun(self: Path, path: string): Path
+---@class path
+---@field new fun(self: path, ...): path
+---@field exists fun(self: path): boolean
+---@field read fun(self: path): string
+---@field write fun(self: path, content: string, mode: string): nil
+---@field mkdir fun(self: path, opts: table): nil
+---@field joinpath fun(self: path, path: string): path
 
-local Job = require('plenary.job')
-local Path = require('plenary.path')
+local job = require('plenary.job')
+local path = require('plenary.path')
 local os = require('os')
 
 ---@class Utils
@@ -24,14 +24,14 @@ local notification_queue = {}
 ---@type boolean
 local inside_tmux = vim.env.TMUX ~= nil
 
----@return Path
+---@return path
 local function get_cache_dir()
     local cache_dir = vim.fn.stdpath('cache')
-    return Path:new(cache_dir, 'utils-nvim-cache')
+    return path:new(cache_dir, 'utils-nvim-cache')
 end
 
 ---@param cache_key string
----@return Path
+---@return path
 local function get_cache_file_path(cache_key)
     local cache_dir = get_cache_dir()
     return cache_dir:joinpath(cache_key .. '.json')
@@ -40,7 +40,7 @@ end
 local cache_dir = get_cache_dir()
 cache_dir:mkdir({ parents = true, exists_ok = true })
 
----@param cache_file Path
+---@param cache_file path
 ---@return {time: number, data: any}|nil
 local function read_cache_file(cache_file)
     if cache_file:exists() then
@@ -53,7 +53,7 @@ local function read_cache_file(cache_file)
     return nil
 end
 
----@param cache_file Path
+---@param cache_file path
 ---@param data any
 local function write_cache_file(cache_file, data)
     local cache_data = {
@@ -129,7 +129,7 @@ end
 ---@param command string
 ---@param callback fun(result: string)
 M.async_shell_execute = function(command, callback)
-    Job:new({
+    job:new({
         command = vim.fn.has('win32') == 1 and 'cmd' or 'sh',
         args = vim.fn.has('win32') == 1 and { '/c', command } or { '-c', command },
         on_exit = function(j, return_val)
