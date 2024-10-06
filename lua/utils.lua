@@ -10,6 +10,7 @@
 ---@field write fun(self: path, content: string, mode: string): nil
 ---@field mkdir fun(self: path, opts: table): nil
 ---@field joinpath fun(self: path, path: string): path
+---@field rm fun(self: path, opts: table): nil
 
 local job = require('plenary.job')
 local path = require('plenary.path')
@@ -34,11 +35,9 @@ end
 ---@return path
 local function get_cache_file_path(cache_key)
     local cache_dir = get_cache_dir()
+    cache_dir:mkdir({ parents = true, exists_ok = true })
     return cache_dir:joinpath(cache_key .. '.json')
 end
-
-local cache_dir = get_cache_dir()
-cache_dir:mkdir({ parents = true, exists_ok = true })
 
 ---@param cache_file path
 ---@return {time: number, data: any}|nil
@@ -187,6 +186,13 @@ M.human_time = function(timestamp)
         return tostring(os.date('%d %b %Y, %I:%M %p', timestamp_int))
     else
         return timestamp
+    end
+end
+
+M.clear_cache = function()
+    local cache_dir = get_cache_dir()
+    if cache_dir:exists() then
+        cache_dir:rm({ recursive = true })
     end
 end
 

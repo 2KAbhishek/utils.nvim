@@ -4,6 +4,7 @@ local describe = require('plenary.busted').describe
 local it = require('plenary.busted').it
 local before_each = require('plenary.busted').before_each
 local after_each = require('plenary.busted').after_each
+local path = require('plenary.path')
 
 ---@type Utils
 local utils = require('utils')
@@ -263,7 +264,7 @@ describe('utils', function()
         end)
     end)
 
-    describe('human_time operations', function()
+    describe('human_time', function()
         it('converts timestamp to human readable format', function()
             local timestamp = '2024-10-05T15:46:41Z'
             local expected = '05 Oct 2024, 03:46 PM'
@@ -276,6 +277,13 @@ describe('utils', function()
             local invalid_timestamp = 'invalid timestamp'
             local result = utils.human_time(invalid_timestamp)
             assert.equal(invalid_timestamp, result)
+        end)
+    end)
+
+    describe('clear_cache', function()
+        it('checks if clear_cache function exists', function()
+            assert.is_not_nil(utils.clear_cache)
+            assert.are.equals(type(utils.clear_cache), 'function')
         end)
     end)
 end)
