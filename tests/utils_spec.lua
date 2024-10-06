@@ -1,4 +1,9 @@
 local stub = require('luassert.stub')
+local assert = require('luassert.assert')
+local describe = require('plenary.busted').describe
+local it = require('plenary.busted').it
+local before_each = require('plenary.busted').before_each
+local after_each = require('plenary.busted').after_each
 
 ---@type Utils
 local utils = require('utils')
@@ -76,10 +81,6 @@ describe('utils', function()
             current_time = os.time()
 
             -- Mock os.time
-            _G.os.time = function()
-                return current_time
-            end
-
             -- Create mock cache file
             mock_cache_file = {
                 exists = function()
@@ -114,7 +115,6 @@ describe('utils', function()
             -- Restore original modules
             package.loaded['plenary.path'] = original_path
             package.loaded['utils'] = nil
-            _G.os.time = os.time
         end)
 
         it('retrieves data from cache when fresh', function()
@@ -128,6 +128,7 @@ describe('utils', function()
             assert.is_true(callback_called)
         end)
     end)
+
     describe('system operations', function()
         it('determines correct open command', function()
             local original_has = vim.fn.has
@@ -259,6 +260,22 @@ describe('utils', function()
 
             -- Restore original job module
             package.loaded['plenary.job'] = original_job
+        end)
+    end)
+
+    describe('human_time operations', function()
+        it('converts timestamp to human readable format', function()
+            local timestamp = '2024-10-05T15:46:41Z'
+            local expected = '05 Oct 2024, 03:46 PM'
+            local result = utils.human_time(timestamp)
+            assert.is_string(result)
+            assert.equal(expected, result)
+        end)
+
+        it('returns invalid timestamps as is', function()
+            local invalid_timestamp = 'invalid timestamp'
+            local result = utils.human_time(invalid_timestamp)
+            assert.equal(invalid_timestamp, result)
         end)
     end)
 end)
