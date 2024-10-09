@@ -20,87 +20,157 @@
 <a href="https://github.com/2KAbhishek/utils.nvim/pulse">
 <img alt="Last Updated" src="https://img.shields.io/github/last-commit/2kabhishek/utils.nvim?style=flat&color=e06c75&label="> </a>
 
-<h3>Ready to go Neovim template 🏗️✈️</h3>
-
-<figure>
-  <img src="doc/images/screenshot.png" alt="utils.nvim in action">
-  <br/>
-  <figcaption>utils.nvim in action</figcaption>
-</figure>
+<h3>Powerful Utilities for Neovim Plugin Devs 🛠️🧰</h3>
 
 </div>
 
-utils.nvim is a neovim plugin that allows neovim users to `<action>`.
+`utils.nvim` is a Neovim plugin that provides a collection of utilities to simplify the development of other Neovim plugins.
 
 ## ✨ Features
 
-- Includes a ready to go neovim plugin template
-- Comes with a lint and test CI action
-- Includes a Github action to auto generate vimdocs
-- Comes with a ready to go README template
-- Works with [mkrepo](https://github.com/2kabhishek/mkrepo)
+- **Notification Management**: Offers functions to queue and display notifications, allowing seamless user communication within plugins.
+- **Command Execution**: Includes capabilities to open commands or directories using the system's default tools, improving workflow efficiency.
+- **Asynchronous Shell Commands**: Execute shell commands asynchronously with callback support, facilitating non-blocking operations.
+- **JSON Handling**: Provides safe JSON decoding, making it easier to work with external data without risking errors.
+- **Caching Mechanism**: Implements a caching system to store data and reduce unnecessary command execution, optimizing performance.
+- **Human-Readable Timestamps**: Converts ISO 8601 timestamps to a more understandable format, enhancing date and time representation in the UI.
+- **Cache Management**: Functions to clear cache files, helping maintain a clean environment.
 
 ## ⚡ Setup
 
 ### ⚙️ Requirements
 
 - Latest version of `neovim`
+- `plenary.nvim`
 
 ### 💻 Installation
+
+`utils.nvim` is not meant to be installed by itself, but rather as a dependency for another plugin.
+
+If you are building a plugin that requires the utilities provided by `utils.nvim`, you can add it as a dependency as shown below:
 
 ```lua
 -- Lazy
 {
-    '2kabhishek/utils.nvim',
+    'yourname/plugin.nvim',
     dependencies = {
-        'nvim-lua/plenary.nvim'
+        '2kabhishek/utils.nvim'
     },
-    cmd = 'TemplateHello',
 },
-
--- Packer
-use '2kabhishek/utils.nvim'
-
 ```
 
 ## 🚀 Usage
 
-1. Fork the `utils.nvim` repo
-2. Update the plugin name, file names etc, change `template` to `your-plugin-name`
-3. Add the code required for your plugin,
+### Functions
 
-   - Main logic, config options for the plugin code goes into [lua/template](./lua/template.lua)
-   - Supporting code goes into [lua/modules](./lua/template/) if needed
-   - For adding commands and keybindngs use [plugin/template](./plugin/template.lua)
-4. Add test code to the [tests](./tests/template) directory
-5. Update the README
-6. Tweak the [docs action](./.github/workflows/docs.yml) file to reflect your username, commit message and plugin name
-
-   - Generating vimdocs needs write access to actions (repo settings > actions > general > workflow permissions)
-
-### Configuration
-
-utils.nvim can be configured using the following options:
+The utilities provided by `utils.nvim` can be directly used in your plugin as shown below:
 
 ```lua
-template.setup({
-    name = 'utils.nvim', -- Name to be greeted, 'World' by default
-})
+local utils = require('utils')
+
+utils.show_notification('Hello World!')
 ```
+
+Below is a list of all the functions provided by `utils.nvim`.
+
+#### `utils.queue_notification(message: string, level?: number, title?: string, timeout?: number)`
+
+Adds a notification to the queue, to be processed and displayed later.
+
+- **Input**:
+  - `message`: The content of the notification.
+  - `level` (optional): The log level of the notification (defaults to `INFO`).
+  - `title` (optional): The title of the notification (defaults to `"Notification"`).
+  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
+- **Output**: No return value. Adds a notification to the queue and schedules it.
+
+#### `utils.show_notification(message: string, level?: number, title?: string, timeout?: number)`
+
+Immediately shows a notification to the user.
+
+- **Input**:
+
+  - `message`: The content of the notification.
+  - `level` (optional): The log level of the notification (defaults to `INFO`).
+  - `title` (optional): The title of the notification (defaults to `"Notification"`).
+  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
+
+- **Output**: No return value. Displays the notification.
+
+#### `utils.open_command(command: string)`
+
+Opens the given command in the default browser/terminal, depending on the system.
+
+- **Input**:
+  - `command`: A string that represents the URL or command to be opened.
+- **Output**: No return value. Executes the open command using the system’s default tool.
+
+#### `utils.open_dir(dir: string)`
+
+Opens a directory inside a tmux session if running within tmux, or directly navigates in Neovim otherwise.
+
+- **Input**:
+
+  - `dir`: Path to the directory to be opened.
+
+- **Output**: No return value. Either navigates to the directory in Neovim or attempts to open the directory in tmux.
+
+#### `utils.async_shell_execute(command: string, callback: fun(result: string))`
+
+Executes a shell command asynchronously and calls the callback with the result.
+
+- **Input**:
+  - `command`: The shell command to be executed.
+  - `callback`: A function that is called with the result of the command execution.
+- **Output**: No return value. The command result is passed to the callback function.
+
+#### `utils.safe_json_decode(str: string) -> table|nil`
+
+Safely decodes a JSON string into a Lua table, with error handling.
+
+- **Input**:
+
+  - `str`: The JSON string to decode.
+
+- **Output**:
+  - On success: Returns a Lua table representation of the JSON string.
+  - On failure: Returns `nil` and logs an error notification.
+
+#### `utils.get_data_from_cache(cache_key: string, command: string, callback: fun(data: any), cache_timeout: number)`
+
+Fetches data from a cached file or executes a command to get fresh data if the cache is expired or missing.
+
+- **Input**:
+
+  - `cache_key`: The cache key to identify the cached data.
+  - `command`: The shell command to execute if the cache is expired or missing.
+  - `callback`: A function that receives the data (either from cache or after executing the command).
+  - `cache_timeout`: The time (in seconds) before the cache expires.
+
+- **Output**: No return value. The data is passed to the callback function.
+
+#### `utils.human_time(timestamp: string) -> string`
+
+Converts an ISO 8601 timestamp into a human-readable format.
+
+- **Input**:
+
+  - `timestamp`: A string in ISO 8601 format (e.g., `"2024-10-10T14:00:00"`).
+
+- **Output**:
+  - Returns the formatted date and time (e.g., `"10 Oct 2024, 02:00 PM"`).
+
+#### `utils.clear_cache()`
+
+Clears the cache by deleting all cached files.
+
+- **Output**: No return value. Clears all cache files and shows a notification confirming the action.
 
 ### Commands
 
-`utils.nvim` adds the following commands:
+`utils.nvim` adds the following command:
 
-- `TemplateHello`: Shows a hello message with the confugred name.
-
-### Keybindings
-
-It is recommended to use:
-
-- `<leader>th,` for `TemplateHello`
-
-> NOTE: By default there are no configured keybindings.
+- **`UtilsClearCache`**: Clears all cache files saved by the plugin. To execute it, run:
 
 ### Help
 
@@ -112,33 +182,25 @@ Planning to add `<feature/module>`.
 
 ### ✅ To-Do
 
-- [x] Setup repo
-- [ ] Think real hard
-- [ ] Start typing
+- You tell me!
 
 ## ⛅ Behind The Code
 
 ### 🌈 Inspiration
 
-utils.nvim was inspired by [nvim-plugin-template](https://github.com/ellisonleao/nvim-plugin-template), I added some changes on top to make setting up a new plugin faster.
+utils.nvim was created while working on [octorepos.nvim](https://github.com/2kabhishek/octorepos.nvim) and [octostats.nvim](https://guithub.com/2kabhishek/octostats.nvim), both of which relied on a lot of common utilities like async shell execution, notifications, and caching.
 
 ### 💡 Challenges/Learnings
 
-- The main challenges were `<issue/difficulty>`
-- I learned about `<learning/accomplishment>`
-
-### 🧰 Tooling
-
-- [dots2k](https://github.com/2kabhishek/dots2k) — Dev Environment
-- [nvim2k](https://github.com/2kabhishek/nvim2k) — Personalized Editor
-- [sway2k](https://github.com/2kabhishek/sway2k) — Desktop Environment
-- [qute2k](https://github.com/2kabhishek/qute2k) — Personalized Browser
+- Figuring out the callback mechanism for async functions was a bit tricky.
+- Learned better ways to handle caching and notifications.
 
 ### 🔍 More Info
 
+- [octorepos.nvim](https://github.com/2kabhishek/octorepos.nevim) — All your GitHub repositories in Neovim, uses utils.nvim
+- [octostats.nvim](https://github.com/2kabhishek/octostats.nevim) — All your GitHub stats in Neovim, uses utils.nvim
 - [nerdy.nvim](https://github.com/2kabhishek/nerdy.nevim) — Find nerd glyphs easily
 - [tdo.nvim](https://github.com/2KAbhishek/tdo.nvim) — Fast and simple notes in Neovim
-- [termim.nvim](https://github.com/2kabhishek/termim,nvim) — Neovim terminal improved
 
 <hr>
 
