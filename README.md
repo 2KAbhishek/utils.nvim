@@ -188,7 +188,7 @@ Planning to add `<feature/module>`.
 
 ### 🌈 Inspiration
 
-utils.nvim was created while working on [octorepos.nvim](https://github.com/2kabhishek/octorepos.nvim) and [octostats.nvim](https://guithub.com/2kabhishek/octostats.nvim), both of which relied on a lot of common utilities like async shell execution, notifications, and caching.
+utils.nvim was created while working on [octohub.nvim](https://github.com/2kabhishek/octohub.nvim) which relied on a lot of common utilities like async shell execution, notifications, and caching.
 
 ### 💡 Challenges/Learnings
 
@@ -197,8 +197,7 @@ utils.nvim was created while working on [octorepos.nvim](https://github.com/2kab
 
 ### 🔍 More Info
 
-- [octorepos.nvim](https://github.com/2kabhishek/octorepos.nevim) — All your GitHub repositories in Neovim, uses utils.nvim
-- [octostats.nvim](https://github.com/2kabhishek/octostats.nevim) — All your GitHub stats in Neovim, uses utils.nvim
+- [octohub.nvim](https://github.com/2kabhishek/octohub.nvim) — All your GitHub features in Neovim, uses utils.nvim
 - [nerdy.nvim](https://github.com/2kabhishek/nerdy.nevim) — Find nerd glyphs easily
 - [tdo.nvim](https://github.com/2KAbhishek/tdo.nvim) — Fast and simple notes in Neovim
 
