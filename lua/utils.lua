@@ -189,12 +189,31 @@ M.human_time = function(timestamp)
     end
 end
 
-M.clear_cache = function()
+---@param prefix string
+M.clear_cache = function(prefix)
     local cache_dir = get_cache_dir()
-    if cache_dir:exists() then
+    if not cache_dir:exists() then
+        return
+    end
+
+    if not prefix then
         cache_dir:rm({ recursive = true })
         M.queue_notification('Cache cleared successfully', nil, 'Utils')
+        return
     end
+
+    local matching_files = vim.fn.globpath(cache_dir:absolute(), prefix .. '*', false, true)
+
+    if #matching_files == 0 then
+        M.queue_notification('No cache items found matching: ' .. prefix, nil, 'Utils')
+        return
+    end
+
+    for _, file in ipairs(matching_files) do
+        vim.fn.delete(file, 'rf')
+    end
+
+    M.queue_notification('Cleared cache items matching: ' .. prefix, nil, 'Utils')
 end
 
 return M
