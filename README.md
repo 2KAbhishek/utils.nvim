@@ -73,7 +73,7 @@ utils.show_notification('Hello World!')
 
 Below is a list of all the functions provided by `utils.nvim`.
 
-#### `utils.queue_notification(message: string, level?: number, title?: string, timeout?: number)`
+> `utils.queue_notification(message: string, level?: number, title?: string, timeout?: number)`
 
 Adds a notification to the queue, to be processed and displayed later.
 
@@ -84,7 +84,7 @@ Adds a notification to the queue, to be processed and displayed later.
   - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
 - **Output**: No return value. Adds a notification to the queue and schedules it.
 
-#### `utils.show_notification(message: string, level?: number, title?: string, timeout?: number)`
+> `utils.show_notification(message: string, level?: number, title?: string, timeout?: number)`
 
 Immediately shows a notification to the user.
 
@@ -97,7 +97,7 @@ Immediately shows a notification to the user.
 
 - **Output**: No return value. Displays the notification.
 
-#### `utils.open_command(command: string)`
+> `utils.open_command(command: string)`
 
 Opens the given command in the default browser/terminal, depending on the system.
 
@@ -105,7 +105,7 @@ Opens the given command in the default browser/terminal, depending on the system
   - `command`: A string that represents the URL or command to be opened.
 - **Output**: No return value. Executes the open command using the system’s default tool.
 
-#### `utils.open_dir(dir: string)`
+> `utils.open_dir(dir: string)`
 
 Opens a directory inside a tmux session if running within tmux, or directly navigates in Neovim otherwise.
 
@@ -115,7 +115,7 @@ Opens a directory inside a tmux session if running within tmux, or directly navi
 
 - **Output**: No return value. Either navigates to the directory in Neovim or attempts to open the directory in tmux.
 
-#### `utils.async_shell_execute(command: string, callback: fun(result: string))`
+> `utils.async_shell_execute(command: string, callback: fun(result: string))`
 
 Executes a shell command asynchronously and calls the callback with the result.
 
@@ -124,7 +124,7 @@ Executes a shell command asynchronously and calls the callback with the result.
   - `callback`: A function that is called with the result of the command execution.
 - **Output**: No return value. The command result is passed to the callback function.
 
-#### `utils.safe_json_decode(str: string) -> table|nil`
+> `utils.safe_json_decode(str: string) -> table|nil`
 
 Safely decodes a JSON string into a Lua table, with error handling.
 
@@ -136,7 +136,7 @@ Safely decodes a JSON string into a Lua table, with error handling.
   - On success: Returns a Lua table representation of the JSON string.
   - On failure: Returns `nil` and logs an error notification.
 
-#### `utils.get_data_from_cache(cache_key: string, command: string, callback: fun(data: any), cache_timeout: number)`
+> `utils.get_data_from_cache(cache_key: string, command: string, callback: fun(data: any), cache_timeout: number)`
 
 Fetches data from a cached file or executes a command to get fresh data if the cache is expired or missing.
 
@@ -149,7 +149,7 @@ Fetches data from a cached file or executes a command to get fresh data if the c
 
 - **Output**: No return value. The data is passed to the callback function.
 
-#### `utils.human_time(timestamp: string) -> string`
+> `utils.human_time(timestamp: string) -> string`
 
 Converts an ISO 8601 timestamp into a human-readable format.
 
@@ -160,10 +160,12 @@ Converts an ISO 8601 timestamp into a human-readable format.
 - **Output**:
   - Returns the formatted date and time (e.g., `"10 Oct 2024, 02:00 PM"`).
 
-#### `utils.clear_cache()`
+> `utils.clear_cache(prefix: string)`
 
 Clears the cache by deleting all cached files.
 
+- **Input**:
+  - `prefix`: The prefix to identify cached files.
 - **Output**: No return value. Clears all cache files and shows a notification confirming the action.
 
 ### Commands
