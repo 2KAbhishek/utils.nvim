@@ -132,9 +132,17 @@ M.async_shell_execute = function(command, callback)
         command = vim.fn.has('win32') == 1 and 'cmd' or 'sh',
         args = vim.fn.has('win32') == 1 and { '/c', command } or { '-c', command },
         on_exit = function(j, return_val)
-            local result = table.concat(j:result(), '\n')
+            local result = j:result()
+            local output = type(result) == 'table' and table.concat(result, '\n') or tostring(result)
+
             if return_val ~= 0 then
-                M.queue_notification('Error executing command: ' .. command, vim.log.levels.ERROR)
+                local error_output = j:stderr_result()
+                error_output = type(error_output) == 'table' and table.concat(error_output, '\n')
+                    or tostring(error_output)
+
+                local error_message =
+                    string.format('Error executing:\n%s\n\nDetails:\n%s\n%s', command, output, error_output)
+                M.queue_notification(error_message, vim.log.levels.ERROR)
                 return
             end
             callback(result)
