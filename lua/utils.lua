@@ -22,6 +22,9 @@ local M = {}
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
 local notification_queue = {}
 
+---@type boolean
+local inside_tmux = vim.env.TMUX ~= nil
+
 ---@return path
 local function get_cache_dir()
     local cache_dir = vim.fn.stdpath('cache')
@@ -109,7 +112,6 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
-    local inside_tmux = vim.env.TMUX ~= nil
     if inside_tmux then
         local open_cmd = string.format('tea %s', dir)
         local open_result = os.execute(open_cmd)
