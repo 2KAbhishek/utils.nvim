@@ -22,9 +22,6 @@ local M = {}
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
 local notification_queue = {}
 
----@type boolean
-local inside_tmux = vim.env.TMUX ~= nil
-
 ---@return path
 local function get_cache_dir()
     local cache_dir = vim.fn.stdpath('cache')
@@ -112,6 +109,7 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
+    local inside_tmux = vim.env.TMUX ~= nil
     if inside_tmux then
         local open_cmd = string.format('tea %s', dir)
         local open_result = os.execute(open_cmd)
@@ -121,7 +119,14 @@ M.open_dir = function(dir)
     end
     vim.schedule(function()
         vim.cmd('cd ' .. dir)
-        vim.cmd('Telescope git_files')
+
+        local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+
+        if is_git_repo then
+            vim.cmd('Telescope git_files cwd=' .. dir)
+        else
+            vim.cmd('Telescope find_files')
+        end
     end)
 end
 
