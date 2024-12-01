@@ -152,7 +152,7 @@ M.async_shell_execute = function(command, callback)
                 M.queue_notification(error_message, vim.log.levels.ERROR)
                 return
             end
-            callback(result)
+            callback(output)
         end,
     }):start()
 end
