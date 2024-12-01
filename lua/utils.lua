@@ -211,12 +211,6 @@ M.clear_cache = function(prefix)
         return
     end
 
-    if not prefix then
-        cache_dir:rm({ recursive = true })
-        M.queue_notification('Cache cleared successfully', nil, 'Utils')
-        return
-    end
-
     local matching_files = vim.fn.globpath(cache_dir:absolute(), prefix .. '*', false, true)
 
     if #matching_files == 0 then
@@ -228,7 +222,7 @@ M.clear_cache = function(prefix)
         vim.fn.delete(file, 'rf')
     end
 
-    M.queue_notification('Cleared cache items matching: ' .. prefix, nil, 'Utils')
+    M.queue_notification('Cleared cache items matching: ' .. prefix .. '*', nil, 'Utils')
 end
 
 return M
