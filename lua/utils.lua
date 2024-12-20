@@ -19,6 +19,16 @@ local os = require('os')
 ---@class Utils
 local M = {}
 
+---@field open_dir_provider string
+M.open_dir_provider = "telescope"
+
+---@param opts table | nil
+M.setup = function(opts)
+  if opts.open_dir_provider then
+    M.open_dir_provider = opts.open_dir_provider
+  end
+end
+
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
 local notification_queue = {}
 
@@ -112,24 +122,32 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
-    if inside_tmux then
-        local open_cmd = string.format('tea %s', dir)
-        local open_result = os.execute(open_cmd)
-        if open_result == 0 then
-            return
-        end
+  if M.open_dir_provider ~= "telescope" and M.open_dir_provider ~= "fzf_lua" then
+    error("Invalid `open_dir_provider`: " .. M.open_dir_provider .. "\nPlease use either 'telescope' or 'fzf_lua'.")
+  end
+
+  if inside_tmux then
+    local open_cmd = string.format('tea %s', dir)
+    local open_result = os.execute(open_cmd)
+    if open_result == 0 then
+      return
     end
-    vim.schedule(function()
-        vim.cmd('cd ' .. dir)
+  end
+  vim.schedule(function()
+    vim.cmd('cd ' .. dir)
 
-        local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+    local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
 
-        if is_git_repo then
-            vim.cmd('Telescope git_files cwd=' .. dir)
-        else
-            vim.cmd('Telescope find_files')
-        end
-    end)
+    if is_git_repo and M.open_dir_provider == "telescope" then
+      vim.cmd('Telescope git_files cwd=' .. dir)
+    elseif is_git_repo and M.open_dir_provider == "fzf_lua" then
+      vim.cmd('FzfLua git_files cwd=' .. dir)
+    elseif M.open_dir_provider == "telescope" then
+      vim.cmd('Telescope find_files')
+    else
+      vim.cmd('FzfLua files')
+    end
+  end)
 end
 
 ---@param command string
