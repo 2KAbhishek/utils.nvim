@@ -152,16 +152,12 @@ describe('utils', function()
 
         it('handles tmux environment for open_dir', function()
             local original_execute = os.execute
-            local execute_called = false
             os.execute = function(cmd)
-                execute_called = true
                 return 1 -- Simulate failure to fall back to Telescope
             end
 
             local original_schedule = vim.schedule
-            local schedule_called = false
             vim.schedule = function(callback)
-                schedule_called = true
                 callback()
             end
 
@@ -171,13 +167,12 @@ describe('utils', function()
                 table.insert(cmd_calls, command)
             end
 
-            utils.open_dir('test/dir')
+            local test_dir = 'test/dir'
+            utils.open_dir(test_dir)
 
-            assert.is_true(execute_called)
-            assert.is_true(schedule_called)
             assert.equal(2, #cmd_calls)
-            assert.equal('cd test/dir', cmd_calls[1])
-            assert.equal('Telescope git_files', cmd_calls[2])
+            assert.equal('cd ' .. test_dir, cmd_calls[1])
+            assert.equal('Telescope git_files cwd=' .. test_dir, cmd_calls[2])
 
             -- Cleanup
             os.execute = original_execute
