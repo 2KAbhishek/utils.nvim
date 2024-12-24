@@ -74,7 +74,7 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
                 -- provider for results from `open_dir`
                 -- can be either 'telescope' or 'fzf_lua'
                 -- defaults to 'telescope'
-                open_dir_provider = "telescope"
+                fuzzy_provider = "telescope"
             }
         }
     },
@@ -82,11 +82,11 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
 
 -- using `setup` function:
 require("utils").setup({
-    open_dir_provider = "telescope"
+    fuzzy_provider = "telescope"
 })
 ```
 
-Currently, there is only a single configurable option `open_dir_provider` which allows the user to switch the backend for the `open_dir` function provided by the plugin. The default is to use Telescope, with the option of switching to fzf-lua instead.
+Currently, there is only a single configurable option `fuzzy_provider` which allows the user to switch the backend for the `open_dir` function provided by the plugin. The default is to use Telescope, with the option of switching to fzf-lua instead.
 
 ## 🚀 Usage
 

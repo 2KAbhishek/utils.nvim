@@ -19,13 +19,13 @@ local os = require('os')
 ---@class Utils
 local M = {}
 
----@field open_dir_provider string
-M.open_dir_provider = "telescope"
+---@field fuzzy_provider string
+M.fuzzy_provider = "telescope"
 
 ---@param opts table | nil
 M.setup = function(opts)
-  if opts.open_dir_provider then
-    M.open_dir_provider = opts.open_dir_provider
+  if opts.fuzzy_provider then
+    M.fuzzy_provider = opts.fuzzy_provider
   end
 end
 
@@ -122,8 +122,8 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
-  if M.open_dir_provider ~= "telescope" and M.open_dir_provider ~= "fzf_lua" then
-    error("Invalid `open_dir_provider`: " .. M.open_dir_provider .. "\nPlease use either 'telescope' or 'fzf_lua'.")
+  if M.fuzzy_provider ~= "telescope" and M.fuzzy_provider ~= "fzf_lua" then
+    error("Invalid `fuzzy_provider`: " .. M.fuzzy_provider .. "\nPlease use either 'telescope' or 'fzf_lua'.")
   end
 
   if inside_tmux then
@@ -138,11 +138,11 @@ M.open_dir = function(dir)
 
     local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
 
-    if is_git_repo and M.open_dir_provider == "telescope" then
+    if is_git_repo and M.fuzzy_provider == "telescope" then
       vim.cmd('Telescope git_files cwd=' .. dir)
-    elseif is_git_repo and M.open_dir_provider == "fzf_lua" then
+    elseif is_git_repo and M.fuzzy_provider == "fzf_lua" then
       vim.cmd('FzfLua git_files cwd=' .. dir)
-    elseif M.open_dir_provider == "telescope" then
+    elseif M.fuzzy_provider == "telescope" then
       vim.cmd('Telescope find_files')
     else
       vim.cmd('FzfLua files')
