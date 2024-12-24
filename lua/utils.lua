@@ -29,6 +29,26 @@ M.setup = function(opts)
   end
 end
 
+---@return string
+local function get_open_command(is_git_repo, dir)
+  local commands = {
+    git = {
+      telescope = 'Telescope git_files cwd=',
+      fzf_lua = 'FzfLua git_files cwd=',
+    },
+    no_git = {
+      telescope = 'Telescope find_files',
+      fzf_lua = 'FzfLua files',
+    },
+  }
+
+  if is_git_repo then
+    return commands.git[M.fuzzy_provider] .. (dir or '')
+  else
+    return commands.no_git[M.fuzzy_provider]
+  end
+end
+
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
 local notification_queue = {}
 
@@ -138,15 +158,7 @@ M.open_dir = function(dir)
 
     local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
 
-    if is_git_repo and M.fuzzy_provider == "telescope" then
-      vim.cmd('Telescope git_files cwd=' .. dir)
-    elseif is_git_repo and M.fuzzy_provider == "fzf_lua" then
-      vim.cmd('FzfLua git_files cwd=' .. dir)
-    elseif M.fuzzy_provider == "telescope" then
-      vim.cmd('Telescope find_files')
-    else
-      vim.cmd('FzfLua files')
-    end
+    vim.cmd(get_open_command(is_git_repo, dir))
   end)
 end
 
