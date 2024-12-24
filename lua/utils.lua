@@ -19,6 +19,36 @@ local os = require('os')
 ---@class Utils
 local M = {}
 
+---@field fuzzy_provider string
+M.fuzzy_provider = "telescope"
+
+---@param opts table | nil
+M.setup = function(opts)
+  if opts.fuzzy_provider then
+    M.fuzzy_provider = opts.fuzzy_provider
+  end
+end
+
+---@return string
+local function get_open_command(is_git_repo, dir)
+  local commands = {
+    git = {
+      telescope = 'Telescope git_files cwd=',
+      fzf_lua = 'FzfLua git_files cwd=',
+    },
+    no_git = {
+      telescope = 'Telescope find_files',
+      fzf_lua = 'FzfLua files',
+    },
+  }
+
+  if is_git_repo then
+    return commands.git[M.fuzzy_provider] .. (dir or '')
+  else
+    return commands.no_git[M.fuzzy_provider]
+  end
+end
+
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
 local notification_queue = {}
 
@@ -112,24 +142,24 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
-    if inside_tmux then
-        local open_cmd = string.format('tea %s', dir)
-        local open_result = os.execute(open_cmd)
-        if open_result == 0 then
-            return
-        end
+  if M.fuzzy_provider ~= "telescope" and M.fuzzy_provider ~= "fzf_lua" then
+    error("Invalid `fuzzy_provider`: " .. M.fuzzy_provider .. "\nPlease use either 'telescope' or 'fzf_lua'.")
+  end
+
+  if inside_tmux then
+    local open_cmd = string.format('tea %s', dir)
+    local open_result = os.execute(open_cmd)
+    if open_result == 0 then
+      return
     end
-    vim.schedule(function()
-        vim.cmd('cd ' .. dir)
+  end
+  vim.schedule(function()
+    vim.cmd('cd ' .. dir)
 
-        local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+    local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
 
-        if is_git_repo then
-            vim.cmd('Telescope git_files cwd=' .. dir)
-        else
-            vim.cmd('Telescope find_files')
-        end
-    end)
+    vim.cmd(get_open_command(is_git_repo, dir))
+  end)
 end
 
 ---@param command string
