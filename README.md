@@ -59,6 +59,35 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
 },
 ```
 
+#### ⚙️ Configuration
+
+`utils.nvim` can optionally be configured by specifying `opts` with Lazy or alternatively with the `setup` function like so:
+
+```lua
+-- Lazy:
+{
+    'yourname/plugin.nvim',
+    dependencies = {
+        {
+            '2kabhishek/utils.nvim',
+            opts = {
+                -- provider for results from `open_dir`
+                -- can be either 'telescope' or 'fzf_lua'
+                -- defaults to 'telescope'
+                fuzzy_provider = "telescope"
+            }
+        }
+    },
+}
+
+-- using `setup` function:
+require("utils").setup({
+    fuzzy_provider = "telescope"
+})
+```
+
+Currently, there is only a single configurable option `fuzzy_provider` which allows the user to switch the backend for the `open_dir` function provided by the plugin. The default is to use Telescope, with the option of switching to fzf-lua instead.
+
 ## 🚀 Usage
 
 ### Functions
