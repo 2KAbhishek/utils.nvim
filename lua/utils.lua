@@ -20,33 +20,47 @@ local os = require('os')
 local M = {}
 
 ---@field fuzzy_provider string
-M.fuzzy_provider = "telescope"
+M.fuzzy_provider = 'telescope'
 
 ---@param opts table | nil
 M.setup = function(opts)
-  if opts.fuzzy_provider then
-    M.fuzzy_provider = opts.fuzzy_provider
-  end
+    if opts.fuzzy_provider then
+        M.fuzzy_provider = opts.fuzzy_provider
+    end
 end
 
----@return string
+---@return function
 local function get_open_command(is_git_repo, dir)
-  local commands = {
-    git = {
-      telescope = 'Telescope git_files cwd=',
-      fzf_lua = 'FzfLua git_files cwd=',
-    },
-    no_git = {
-      telescope = 'Telescope find_files',
-      fzf_lua = 'FzfLua files',
-    },
-  }
+    local commands = {
+        git = {
+            telescope = function()
+                vim.cmd('Telescope git_files cwd=' .. (dir or ''))
+            end,
+            fzf_lua = function()
+                vim.cmd('FzfLua git_files cwd=' .. (dir or ''))
+            end,
+            snacks = function()
+                Snacks.picker.git_files({ cwd = dir })
+            end,
+        },
+        no_git = {
+            telescope = function()
+                vim.cmd('Telescope find_files')
+            end,
+            fzf_lua = function()
+                vim.cmd('FzfLua files')
+            end,
+            snacks = function()
+                Snacks.picker.files()
+            end,
+        },
+    }
 
-  if is_git_repo then
-    return commands.git[M.fuzzy_provider] .. (dir or '')
-  else
-    return commands.no_git[M.fuzzy_provider]
-  end
+    if is_git_repo then
+        return commands.git[M.fuzzy_provider]
+    else
+        return commands.no_git[M.fuzzy_provider]
+    end
 end
 
 ---@type table<number, {message: string, level: number, title: string, timeout: number}>
@@ -142,24 +156,29 @@ end
 
 ---@param dir string
 M.open_dir = function(dir)
-  if M.fuzzy_provider ~= "telescope" and M.fuzzy_provider ~= "fzf_lua" then
-    error("Invalid `fuzzy_provider`: " .. M.fuzzy_provider .. "\nPlease use either 'telescope' or 'fzf_lua'.")
-  end
-
-  if inside_tmux then
-    local open_cmd = string.format('tea %s', dir)
-    local open_result = os.execute(open_cmd)
-    if open_result == 0 then
-      return
+    if M.fuzzy_provider ~= 'telescope' and M.fuzzy_provider ~= 'fzf_lua' and M.fuzzy_provider ~= 'snacks' then
+        error(
+            'Invalid `fuzzy_provider`: '
+                .. M.fuzzy_provider
+                .. "\nPlease use either 'telescope', 'fzf_lua' or 'snacks'."
+        )
     end
-  end
-  vim.schedule(function()
-    vim.cmd('cd ' .. dir)
 
-    local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+    if inside_tmux then
+        local open_cmd = string.format('tea %s', dir)
+        local open_result = os.execute(open_cmd)
+        if open_result == 0 then
+            return
+        end
+    end
+    vim.schedule(function()
+        vim.cmd('cd ' .. dir)
 
-    vim.cmd(get_open_command(is_git_repo, dir))
-  end)
+        local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+
+        local open_cmd = get_open_command(is_git_repo, dir)
+        open_cmd()
+    end)
 end
 
 ---@param command string
