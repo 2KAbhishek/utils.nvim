@@ -58,7 +58,7 @@ CONFIGURATION
 alternatively with the `setup` function like so:
 
 >lua
-    -- Lazy:
+    -- Lazy opts:
     {
         'yourname/plugin.nvim',
         dependencies = {
@@ -79,11 +79,6 @@ alternatively with the `setup` function like so:
         fuzzy_provider = "telescope"
     })
 <
-
-Currently, there is only a single configurable option `fuzzy_provider` which
-allows the user to switch the backend for the `open_dir` function provided by
-the plugin. The default is to use Telescope, with the option of switching to
-fzf-lua or snacks instead.
 
 
 USAGE                                                            *utils-usage*
