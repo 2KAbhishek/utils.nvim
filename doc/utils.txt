@@ -1,4 +1,4 @@
-*utils.txt*          For Neovim >= 0.8.0         Last change: 2024 December 27
+*utils.txt*          For Neovim >= 0.8.0         Last change: 2025 February 10
 
 ==============================================================================
 Table of Contents                                    *utils-table-of-contents*
@@ -66,7 +66,7 @@ alternatively with the `setup` function like so:
                 '2kabhishek/utils.nvim',
                 opts = {
                     -- provider for results from `open_dir`
-                    -- can be either 'telescope' or 'fzf_lua'
+                    -- can be either 'telescope', 'fzf_lua', or 'snacks'
                     -- defaults to 'telescope'
                     fuzzy_provider = "telescope"
                 }
@@ -83,7 +83,7 @@ alternatively with the `setup` function like so:
 Currently, there is only a single configurable option `fuzzy_provider` which
 allows the user to switch the backend for the `open_dir` function provided by
 the plugin. The default is to use Telescope, with the option of switching to
-fzf-lua instead.
+fzf-lua or snacks instead.
 
 
 USAGE                                                            *utils-usage*
