@@ -6,9 +6,12 @@ local job = require('plenary.job')
 
 local os = require('os')
 local noti = require('utils.notification')
+local picker = require('utils.picker')
 
 ---@class Utils.Shell
 local M = {}
+
+M.inside_tmux = vim.env.TMUX ~= nil
 
 ---@param command string
 ---@param callback fun(result: string)
@@ -46,6 +49,19 @@ M.open_command = function(command)
         open_command = 'start'
     end
     os.execute(open_command .. ' ' .. command)
+end
+
+---@param dir string
+M.open_session_or_dir = function(dir)
+    if M.inside_tmux then
+        local open_cmd = string.format('tea %s', dir)
+        local open_result = os.execute(open_cmd)
+        if open_result == 0 then
+            return
+        end
+    end
+    vim.cmd('cd ' .. dir)
+    picker.files(dir)
 end
 
 return M
