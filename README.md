@@ -73,8 +73,8 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
             opts = {
                 -- provider for results from `open_dir`
                 -- can be either 'telescope', 'fzf_lua', or 'snacks'
-                -- defaults to 'telescope'
-                fuzzy_provider = "telescope"
+                -- defaults to 'snacks'
+                picker_provider = "snacks",
             }
         }
     },
@@ -82,57 +82,27 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
 
 -- using `setup` function:
 require("utils").setup({
-    fuzzy_provider = "telescope"
+    picker_provider = "telescope"
 })
 ```
 
 ## 🚀 Usage
 
+### Modules
+
+`utils.nvim` is divided into several modules, each providing specific functionalities:
+
+- `picker`: a module for opening directories, files and other lists using different picker providers.
+- `cache`: a module for caching data and managing cache files.
+- `shell`: a module for executing shell commands and opening URLs, files.
+- `json`: a module for handling JSON data, like safe decoding.
+- `time`: a module for converting timestamps to human-readable formats.
+
 ### Functions
-
-The utilities provided by `utils.nvim` can be directly used in your plugin as shown below:
-
-```lua
-local utils = require('utils')
-
-utils.show_notification('Hello World!')
-```
 
 Below is a list of all the functions provided by `utils.nvim`.
 
-> `utils.queue_notification(message: string, level?: number, title?: string, timeout?: number)`
-
-Adds a notification to the queue, to be processed and displayed later.
-
-- **Input**:
-  - `message`: The content of the notification.
-  - `level` (optional): The log level of the notification (defaults to `INFO`).
-  - `title` (optional): The title of the notification (defaults to `"Notification"`).
-  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
-- **Output**: No return value. Adds a notification to the queue and schedules it.
-
-> `utils.show_notification(message: string, level?: number, title?: string, timeout?: number)`
-
-Immediately shows a notification to the user.
-
-- **Input**:
-
-  - `message`: The content of the notification.
-  - `level` (optional): The log level of the notification (defaults to `INFO`).
-  - `title` (optional): The title of the notification (defaults to `"Notification"`).
-  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
-
-- **Output**: No return value. Displays the notification.
-
-> `utils.open_command(command: string)`
-
-Opens the given command in the default browser/terminal, depending on the system.
-
-- **Input**:
-  - `command`: A string that represents the URL or command to be opened.
-- **Output**: No return value. Executes the open command using the system’s default tool.
-
-> `utils.open_dir(dir: string)`
+> `picker.open_dir(dir: string)`
 
 Opens a directory inside a tmux session if running within tmux, or directly navigates in Neovim otherwise.
 
@@ -142,28 +112,7 @@ Opens a directory inside a tmux session if running within tmux, or directly navi
 
 - **Output**: No return value. Either navigates to the directory in Neovim or attempts to open the directory in tmux.
 
-> `utils.async_shell_execute(command: string, callback: fun(result: string))`
-
-Executes a shell command asynchronously and calls the callback with the result.
-
-- **Input**:
-  - `command`: The shell command to be executed.
-  - `callback`: A function that is called with the result of the command execution.
-- **Output**: No return value. The command result is passed to the callback function.
-
-> `utils.safe_json_decode(str: string) -> table|nil`
-
-Safely decodes a JSON string into a Lua table, with error handling.
-
-- **Input**:
-
-  - `str`: The JSON string to decode.
-
-- **Output**:
-  - On success: Returns a Lua table representation of the JSON string.
-  - On failure: Returns `nil` and logs an error notification.
-
-> `utils.get_data_from_cache(cache_key: string, command: string, callback: fun(data: any), cache_timeout: number)`
+> `cache.get_data_from_cache(cache_key: string, command: string, callback: fun(data: any), cache_timeout: number)`
 
 Fetches data from a cached file or executes a command to get fresh data if the cache is expired or missing.
 
@@ -176,7 +125,68 @@ Fetches data from a cached file or executes a command to get fresh data if the c
 
 - **Output**: No return value. The data is passed to the callback function.
 
-> `utils.human_time(timestamp: string) -> string`
+> `cache.clear_cache(prefix: string)`
+
+Clears the cache by deleting all cached files.
+
+- **Input**:
+  - `prefix`: The prefix to identify cached files.
+- **Output**: No return value. Clears all cache files and shows a notification confirming the action.
+
+> `shell.open_command(command: string)`
+
+Opens the given command in the default browser/terminal, depending on the system.
+
+- **Input**:
+  - `command`: A string that represents the URL or command to be opened.
+- **Output**: No return value. Executes the open command using the system’s default tool.
+
+> `shell.async_shell_execute(command: string, callback: fun(result: string))`
+
+Executes a shell command asynchronously and calls the callback with the result.
+
+- **Input**:
+  - `command`: The shell command to be executed.
+  - `callback`: A function that is called with the result of the command execution.
+- **Output**: No return value. The command result is passed to the callback function.
+
+> `notification.queue_notification(message: string, level?: number, title?: string, timeout?: number)`
+
+Adds a notification to the queue, to be processed and displayed later.
+
+- **Input**:
+  - `message`: The content of the notification.
+  - `level` (optional): The log level of the notification (defaults to `INFO`).
+  - `title` (optional): The title of the notification (defaults to `"Notification"`).
+  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
+- **Output**: No return value. Adds a notification to the queue and schedules it.
+
+> `notification.show_notification(message: string, level?: number, title?: string, timeout?: number)`
+
+Immediately shows a notification to the user.
+
+- **Input**:
+
+  - `message`: The content of the notification.
+  - `level` (optional): The log level of the notification (defaults to `INFO`).
+  - `title` (optional): The title of the notification (defaults to `"Notification"`).
+  - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
+
+- **Output**: No return value. Displays the notification.
+
+> `json.safe_json_decode(str: string) -> table|nil`
+
+Safely decodes a JSON string into a Lua table, with error handling.
+
+- **Input**:
+
+  - `str`: The JSON string to decode.
+
+- **Output**:
+  - On success: Returns a Lua table representation of the JSON string.
+  - On failure: Returns `nil` and logs an error notification.
+
+> `time.human_time(timestamp: string) -> string`
 
 Converts an ISO 8601 timestamp into a human-readable format.
 
@@ -187,14 +197,6 @@ Converts an ISO 8601 timestamp into a human-readable format.
 - **Output**:
   - Returns the formatted date and time (e.g., `"10 Oct 2024, 02:00 PM"`).
 
-> `utils.clear_cache(prefix: string)`
-
-Clears the cache by deleting all cached files.
-
-- **Input**:
-  - `prefix`: The prefix to identify cached files.
-- **Output**: No return value. Clears all cache files and shows a notification confirming the action.
-
 ### Commands
 
 `utils.nvim` adds the following command:
@@ -203,7 +205,7 @@ Clears the cache by deleting all cached files.
 
 ### Help
 
-Run `:help nerdy` for more details.
+Run `:help utils.txt` for more details.
 
 ## 🏗️ What's Next
 
