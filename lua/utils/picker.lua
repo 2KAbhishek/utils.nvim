@@ -7,9 +7,10 @@ local M = {}
 
 ---@type boolean
 local inside_tmux = vim.env.TMUX ~= nil
+local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
 
 ---@return function
-local function get_open_command(is_git_repo, dir)
+local function get_open_dir_command(dir)
     local commands = {
         git = {
             telescope = function()
@@ -42,22 +43,9 @@ local function get_open_command(is_git_repo, dir)
     end
 end
 
----@param command string
-M.open_command = function(command)
-    local open_command
-    if vim.fn.has('mac') == 1 then
-        open_command = 'open'
-    elseif vim.fn.has('unix') == 1 then
-        open_command = 'xdg-open'
-    else
-        open_command = 'start'
-    end
-    os.execute(open_command .. ' ' .. command)
-end
-
 ---@param dir string
 M.open_dir = function(dir)
-    if picker_provider ~= 'telescope' and picker_provider ~= 'fzf_lua' and picker_provider ~= 'snacks' then
+    if picker_provider ~= 'snacks' and picker_provider ~= 'fzf_lua' and picker_provider ~= 'telescope' then
         error(
             'Invalid `fuzzy_provider`: ' .. picker_provider .. "\nPlease use either 'telescope', 'fzf_lua' or 'snacks'."
         )
@@ -73,9 +61,7 @@ M.open_dir = function(dir)
     vim.schedule(function()
         vim.cmd('cd ' .. dir)
 
-        local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
-
-        local open_cmd = get_open_command(is_git_repo, dir)
+        local open_cmd = get_open_dir_command(dir)
         open_cmd()
     end)
 end

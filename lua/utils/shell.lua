@@ -4,6 +4,7 @@
 ---@field result fun(self: job): string[]
 local job = require('plenary.job')
 
+local os = require('os')
 local noti = require('utils.notification')
 
 ---@class Utils.Shell
@@ -32,6 +33,19 @@ M.async_shell_execute = function(command, callback)
             callback(output)
         end,
     }):start()
+end
+
+---@param command string
+M.open_command = function(command)
+    local open_command
+    if vim.fn.has('mac') == 1 then
+        open_command = 'open'
+    elseif vim.fn.has('unix') == 1 then
+        open_command = 'xdg-open'
+    else
+        open_command = 'start'
+    end
+    os.execute(open_command .. ' ' .. command)
 end
 
 return M
