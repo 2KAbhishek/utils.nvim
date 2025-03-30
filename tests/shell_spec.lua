@@ -1,3 +1,4 @@
+local stub = require('luassert.stub')
 local assert = require('luassert.assert')
 local describe = require('plenary.busted').describe
 local it = require('plenary.busted').it
@@ -103,6 +104,27 @@ describe('utils.shell', function()
 
             -- Restore original job module
             package.loaded['plenary.job'] = original_job
+        end)
+    end)
+
+    describe('system operations', function()
+        it('determines correct open command', function()
+            local original_has = vim.fn.has
+            vim.fn.has = function(what)
+                if what == 'mac' then
+                    return 1
+                else
+                    return 0
+                end
+            end
+
+            local stub_execute = stub(os, 'execute')
+            shell.open_command('test.txt')
+            assert.stub(stub_execute).was_called_with('open test.txt')
+
+            -- Cleanup
+            vim.fn.has = original_has
+            stub_execute:revert()
         end)
     end)
 end)
