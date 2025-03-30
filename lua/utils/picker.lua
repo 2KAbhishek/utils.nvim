@@ -5,64 +5,73 @@ local picker_provider = config.config.picker_provider
 ---@class Utils.Picker
 local M = {}
 
----@type boolean
-local inside_tmux = vim.env.TMUX ~= nil
-local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
-
 ---@return function
-local function get_open_dir_command(dir)
-    local commands = {
-        git = {
+local function get_picker_command(command, opts)
+    local picker_commands = {
+        git_files = {
+            snacks = function()
+                require('snacks.picker').git_files(opts)
+            end,
             telescope = function()
-                vim.cmd('Telescope git_files cwd=' .. (dir or ''))
+                opts.prompt_title = opts.title
+                require('telescope.builtin').git_files(opts)
             end,
             fzf_lua = function()
-                vim.cmd('FzfLua git_files cwd=' .. (dir or ''))
+                require('fzf-lua').git_files(opts)
             end,
-            snacks = function()
-                Snacks.picker.git_files({ cwd = dir })
+            mini = function()
+                require('mini.pick').builtin.files(opts)
             end,
         },
-        no_git = {
+        files = {
+            snacks = function()
+                require('snacks.picker').files(opts)
+            end,
             telescope = function()
-                vim.cmd('Telescope find_files')
+                opts.prompt_title = opts.title
+                require('telescope.builtin').find_files(opts)
             end,
             fzf_lua = function()
-                vim.cmd('FzfLua files')
+                require('fzf-lua').files(opts)
             end,
+            mini = function()
+                require('mini.pick').builtin.files(opts)
+            end,
+        },
+        live_grep = {
             snacks = function()
-                Snacks.picker.files()
+                require('snacks.picker').grep(opts)
+            end,
+            telescope = function()
+                opts.prompt_title = opts.title
+                require('telescope.builtin').live_grep(opts)
+            end,
+            fzf_lua = function()
+                require('fzf-lua').live_grep(opts)
+            end,
+            mini = function()
+                require('mini.pick').builtin.grep(opts)
             end,
         },
     }
 
-    if is_git_repo then
-        return commands.git[picker_provider]
-    else
-        return commands.no_git[picker_provider]
-    end
+    return picker_commands[command][picker_provider]
 end
 
----@param dir string
-M.open_dir = function(dir)
-    if picker_provider ~= 'snacks' and picker_provider ~= 'fzf_lua' and picker_provider ~= 'telescope' then
-        error(
-            'Invalid `fuzzy_provider`: ' .. picker_provider .. "\nPlease use either 'telescope', 'fzf_lua' or 'snacks'."
-        )
-    end
-
-    if inside_tmux then
-        local open_cmd = string.format('tea %s', dir)
-        local open_result = os.execute(open_cmd)
-        if open_result == 0 then
-            return
-        end
-    end
+M.files = function(opts)
+    local is_git_repo =
+        vim.fn.system('cd ' .. opts.cwd .. ' && git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
+    local command = is_git_repo and 'git_files' or 'files'
     vim.schedule(function()
-        vim.cmd('cd ' .. dir)
+        local picker_cmd = get_picker_command(command, opts)
+        picker_cmd()
+    end)
+end
 
-        local open_cmd = get_open_dir_command(dir)
-        open_cmd()
+M.live_grep = function(opts)
+    vim.schedule(function()
+        local picker_cmd = get_picker_command('live_grep', opts)
+        picker_cmd()
     end)
 end
 
