@@ -24,17 +24,15 @@
 
 </div>
 
-`utils.nvim` is a Neovim plugin that provides a collection of utilities to simplify the development of other Neovim plugins.
+`utils.nvim` is a Neovim plugin that provides a collection of utilities to simplify the development of your Neovim plugins.
 
 ## ✨ Features
 
-- **Notification Management**: Offers functions to queue and display notifications, allowing seamless user communication within plugins.
-- **Command Execution**: Includes capabilities to open commands or directories using the system's default tools, improving workflow efficiency.
-- **Asynchronous Shell Commands**: Execute shell commands asynchronously with callback support, facilitating non-blocking operations.
-- **JSON Handling**: Provides safe JSON decoding, making it easier to work with external data without risking errors.
+- **Picker Absctraction**: Offers a simple interface for popular pickers, no need to write custom picker anymore!
 - **Caching Mechanism**: Implements a caching system to store data and reduce unnecessary command execution, optimizing performance.
-- **Human-Readable Timestamps**: Converts ISO 8601 timestamps to a more understandable format, enhancing date and time representation in the UI.
-- **Cache Management**: Functions to clear cache files, helping maintain a clean environment.
+- **Notification Management**: Offers functions to queue and display notifications, allowing seamless user communication within plugins.
+- **Shell Execution**: Includes capabilities to execute commands async, work with system tools, improving workflow efficiency.
+- More!
 
 ## ⚡ Setup
 
@@ -92,10 +90,8 @@ require("utils").setup({
 
 - `picker`: a module providing abstractions over various picker providers, supports `telescope`, `fzf_lua`, and `snacks`.
 - `cache`: a module for caching data and managing cache files.
+- `notification`: a module for simplifying notification queues.
 - `shell`: a module for executing shell commands and opening URLs, files.
-- `json`: a module for handling JSON data, like safe decoding.
-- `time`: a module for converting timestamps to human-readable formats.
-
 ### Functions
 
 Below is a list of all the functions provided by `utils.nvim`.
@@ -194,6 +190,8 @@ Converts an ISO 8601 timestamp into a human-readable format.
 
 - **Output**:
   - Returns the formatted date and time (e.g., `"10 Oct 2024, 02:00 PM"`).
+- `json`: a module for handling JSON data.
+- `time`: a module for working with time and date.
 
 ### Commands
 
