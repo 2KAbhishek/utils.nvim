@@ -17,6 +17,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').git_files(opts)
             end,
             fzf_lua = function()
+                opts.prompt = opts.title
                 require('fzf-lua').git_files(opts)
             end,
             mini = function()
@@ -32,6 +33,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').find_files(opts)
             end,
             fzf_lua = function()
+                opts.prompt = opts.title
                 require('fzf-lua').files(opts)
             end,
             mini = function()
@@ -47,6 +49,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').live_grep(opts)
             end,
             fzf_lua = function()
+                opts.prompt = opts.title
                 require('fzf-lua').live_grep(opts)
             end,
             mini = function()
