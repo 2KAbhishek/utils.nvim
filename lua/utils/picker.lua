@@ -130,4 +130,11 @@ M.live_grep = function(opts)
     end)
 end
 
+M.select_file = function(opts)
+    vim.schedule(function()
+        local picker_cmd = get_picker_command('select_file', opts)
+        picker_cmd()
+    end)
+end
+
 return M
