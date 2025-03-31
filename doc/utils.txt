@@ -1,4 +1,4 @@
-*utils.txt*           For Neovim >= 0.8.0           Last change: 2025 March 30
+*utils.txt*           For Neovim >= 0.8.0           Last change: 2025 March 31
 
 ==============================================================================
 Table of Contents                                    *utils-table-of-contents*
@@ -10,18 +10,16 @@ Table of Contents                                    *utils-table-of-contents*
   - Behind The Code                                    |utils-behind-the-code|
 
 `utils.nvim`is a Neovim plugin that provides a collection of utilities to
-simplify the development of other Neovim plugins.
+simplify the development of your Neovim plugins.
 
 
 FEATURES                                                      *utils-features*
 
-- **Notification Management**Offers functions to queue and display notifications, allowing seamless user communication within plugins.
-- **Command Execution**Includes capabilities to open commands or directories using the system’s default tools, improving workflow efficiency.
-- **Asynchronous Shell Commands**Execute shell commands asynchronously with callback support, facilitating non-blocking operations.
-- **JSON Handling**Provides safe JSON decoding, making it easier to work with external data without risking errors.
+- **Picker Absctraction**Offers a simple interface for popular pickers, no need to write custom picker anymore!
 - **Caching Mechanism**Implements a caching system to store data and reduce unnecessary command execution, optimizing performance.
-- **Human-Readable Timestamps**Converts ISO 8601 timestamps to a more understandable format, enhancing date and time representation in the UI.
-- **Cache Management**Functions to clear cache files, helping maintain a clean environment.
+- **Notification Management**Offers functions to queue and display notifications, allowing seamless user communication within plugins.
+- **Shell Execution**Includes capabilities to execute commands async, work with system tools, improving workflow efficiency.
+- More!
 
 
 SETUP                                                            *utils-setup*
@@ -65,9 +63,7 @@ alternatively with the `setup` function like so:
             {
                 '2kabhishek/utils.nvim',
                 opts = {
-                    -- provider for results from `open_dir`
-                    -- can be either 'telescope', 'fzf_lua', or 'snacks'
-                    -- defaults to 'snacks'
+                    -- 'telescope', 'fzf_lua', or 'snacks' (default)
                     picker_provider = "snacks",
                 }
             }
@@ -89,108 +85,12 @@ MODULES ~
 `utils.nvim` is divided into several modules, each providing specific
 functionalities:
 
-- `picker`a module for opening directories, files and other lists using different picker providers.
+- `picker`a module providing abstractions over various picker providers, supports `telescope`, `fzf_lua`, and `snacks`.
 - `cache`a module for caching data and managing cache files.
+- `notification`a module for simplifying notification queues.
 - `shell`a module for executing shell commands and opening URLs, files.
-- `json`a module for handling JSON data, like safe decoding.
-- `time`a module for converting timestamps to human-readable formats.
-
-
-FUNCTIONS ~
-
-Below is a list of all the functions provided by `utils.nvim`.
-
-
-  `picker.open_dir(dir: string)`
-Opens a directory inside a tmux session if running within tmux, or directly
-navigates in Neovim otherwise.
-
-- **Input**
-    - `dir`Path to the directory to be opened.
-- **Output**No return value. Either navigates to the directory in Neovim or
-    attempts to open the directory in tmux.
-
-
-  `cache.get_data_from_cache(cache_key: string, command: string, callback:
-  fun(data: any), cache_timeout: number)`
-Fetches data from a cached file or executes a command to get fresh data if the
-cache is expired or missing.
-
-- **Input**
-    - `cache_key`The cache key to identify the cached data.
-    - `command`The shell command to execute if the cache is expired or missing.
-    - `callback`A function that receives the data (either from cache or after executing the command).
-    - `cache_timeout`The time (in seconds) before the cache expires.
-- **Output**No return value. The data is passed to the callback function.
-
-
-  `cache.clear_cache(prefix: string)`
-Clears the cache by deleting all cached files.
-
-- **Input**
-    - `prefix`The prefix to identify cached files.
-- **Output**No return value. Clears all cache files and shows a notification confirming the action.
-
-
-  `shell.open_command(command: string)`
-Opens the given command in the default browser/terminal, depending on the
-system.
-
-- **Input**
-    - `command`A string that represents the URL or command to be opened.
-- **Output**No return value. Executes the open command using the system’s default tool.
-
-
-  `shell.async_shell_execute(command: string, callback: fun(result: string))`
-Executes a shell command asynchronously and calls the callback with the result.
-
-- **Input**
-    - `command`The shell command to be executed.
-    - `callback`A function that is called with the result of the command execution.
-- **Output**No return value. The command result is passed to the callback function.
-
-
-  `notification.queue_notification(message: string, level?: number, title?:
-  string, timeout?: number)`
-Adds a notification to the queue, to be processed and displayed later.
-
-- **Input**
-    - `message`The content of the notification.
-    - `level` (optional): The log level of the notification (defaults to `INFO`).
-    - `title` (optional): The title of the notification (defaults to `"Notification"`).
-    - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
-- **Output**No return value. Adds a notification to the queue and schedules it.
-
-
-  `notification.show_notification(message: string, level?: number, title?:
-  string, timeout?: number)`
-Immediately shows a notification to the user.
-
-- **Input**
-    - `message`The content of the notification.
-    - `level` (optional): The log level of the notification (defaults to `INFO`).
-    - `title` (optional): The title of the notification (defaults to `"Notification"`).
-    - `timeout` (optional): Duration to show the notification (defaults to `5000ms`).
-- **Output**No return value. Displays the notification.
-
-
-  `json.safe_json_decode(str: string) -> table|nil`
-Safely decodes a JSON string into a Lua table, with error handling.
-
-- **Input**
-    - `str`The JSON string to decode.
-- **Output**
-    - Onsuccess: Returns a Lua table representation of the JSON string.
-    - On failure: Returns `nil` and logs an error notification.
-
-
-  `time.human_time(timestamp: string) -> string`
-Converts an ISO 8601 timestamp into a human-readable format.
-
-- **Input**
-    - `timestamp`A string in ISO 8601 format (e.g., `"2024-10-10T14:00:00"`).
-- **Output**
-    - Returnsthe formatted date and time (e.g., `"10 Oct 2024, 02:00 PM"`).
+- `json`a module for handling JSON data.
+- `time`a module for working with time and date.
 
 
 COMMANDS ~
