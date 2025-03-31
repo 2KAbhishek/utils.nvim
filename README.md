@@ -71,9 +71,7 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
         {
             '2kabhishek/utils.nvim',
             opts = {
-                -- provider for results from `open_dir`
-                -- can be either 'telescope', 'fzf_lua', or 'snacks'
-                -- defaults to 'snacks'
+                -- 'telescope', 'fzf_lua', or 'snacks' (default)
                 picker_provider = "snacks",
             }
         }
@@ -92,7 +90,7 @@ require("utils").setup({
 
 `utils.nvim` is divided into several modules, each providing specific functionalities:
 
-- `picker`: a module for opening directories, files and other lists using different picker providers.
+- `picker`: a module providing abstractions over various picker providers, supports `telescope`, `fzf_lua`, and `snacks`.
 - `cache`: a module for caching data and managing cache files.
 - `shell`: a module for executing shell commands and opening URLs, files.
 - `json`: a module for handling JSON data, like safe decoding.
