@@ -20,9 +20,6 @@ local function get_picker_command(command, opts)
                 opts.prompt = opts.title
                 require('fzf-lua').git_files(opts)
             end,
-            mini = function()
-                require('mini.pick').builtin.files(opts)
-            end,
         },
         files = {
             snacks = function()
@@ -36,9 +33,6 @@ local function get_picker_command(command, opts)
                 opts.prompt = opts.title
                 require('fzf-lua').files(opts)
             end,
-            mini = function()
-                require('mini.pick').builtin.files(opts)
-            end,
         },
         live_grep = {
             snacks = function()
@@ -51,9 +45,6 @@ local function get_picker_command(command, opts)
             fzf_lua = function()
                 opts.prompt = opts.title
                 require('fzf-lua').live_grep(opts)
-            end,
-            mini = function()
-                require('mini.pick').builtin.grep(opts)
             end,
         },
         select_file = {
