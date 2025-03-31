@@ -53,6 +53,61 @@ local function get_picker_command(command, opts)
                 require('mini.pick').builtin.grep(opts)
             end,
         },
+        select_file = {
+            snacks = function()
+                local items = {}
+                for _, file in ipairs(opts.items) do
+                    table.insert(items, {
+                        text = vim.fn.fnamemodify(file, ':t'),
+                        file = file,
+                    })
+                end
+                require('snacks.picker').pick({
+                    items = items,
+                    title = opts.title,
+                    format = Snacks.picker.format.file,
+                    actions = {
+                        confirm = Snacks.picker.actions.jump,
+                    },
+                })
+            end,
+            telescope = function()
+                opts.prompt_title = opts.title
+                require('telescope.pickers')
+                    .new({}, {
+                        prompt_title = opts.prompt_title,
+                        finder = require('telescope.finders').new_table({
+                            results = opts.items,
+                            entry_maker = require('telescope.make_entry').gen_from_file(),
+                        }),
+                        sorter = require('telescope.sorters').get_fzy_sorter(),
+                        previewer = require('telescope.previewers').vim_buffer_cat.new({}),
+                    })
+                    :find()
+            end,
+            fzf_lua = function()
+                local fzf_lua = require('fzf-lua')
+
+                local formatted_items = {}
+                for _, file in ipairs(opts.items) do
+                    table.insert(formatted_items, file)
+                end
+
+                fzf_lua.fzf_exec(formatted_items, {
+                    prompt = opts.title,
+                    file_icons = true,
+                    previewer = 'builtin',
+                    file_skip_empty_lines = true,
+                    actions = {
+                        ['default'] = function(selected)
+                            if selected and #selected > 0 then
+                                vim.cmd('edit ' .. vim.fn.fnameescape(selected[1]))
+                            end
+                        end,
+                    },
+                })
+            end,
+        },
     }
 
     return picker_commands[command][picker_provider]
