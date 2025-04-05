@@ -61,7 +61,7 @@ M.open_session_or_dir = function(dir)
         end
     end
     vim.cmd('cd ' .. dir)
-    picker.files({cwd = dir})
+    picker.files({ cwd = dir })
 end
 
 return M
