@@ -81,12 +81,7 @@ local function get_picker_command(command, opts)
             fzf_lua = function()
                 local fzf_lua = require('fzf-lua')
 
-                local formatted_items = {}
-                for _, file in ipairs(opts.items) do
-                    table.insert(formatted_items, file)
-                end
-
-                fzf_lua.fzf_exec(formatted_items, {
+                fzf_lua.fzf_exec(opts.items, {
                     prompt = opts.title,
                     file_icons = true,
                     previewer = 'builtin',
@@ -169,20 +164,29 @@ local function get_picker_command(command, opts)
                     item_map[formatted_items[i]] = item
                 end
 
-                -- Creating a simpler previewer setup that works with fzf-lua's API
-                local preview_fn = function(_, line, _)
-                    if line then
-                        local item = item_map[line]
-                        if item then
-                            return opts.preview_generator(item)
-                        end
-                    end
-                    return ''
+                -- Create a simple shell script that will handle previews
+                local preview_script = vim.fn.tempname()
+                local file = io.open(preview_script, 'w')
+                file:write('#!/bin/bash\n')
+
+                -- Add a case statement to the script
+                file:write('case "$1" in\n')
+                for display, item in pairs(item_map) do
+                    local preview = opts.preview_generator(item):gsub('"', '\\"')
+                    file:write(string.format('    "%s")\n        echo "%s"\n        ;;\n', display, preview))
                 end
+                file:write('    *)\n        echo "No preview available"\n        ;;\nesac\n')
+                file:close()
+
+                -- Make the script executable
+                vim.fn.system('chmod +x ' .. preview_script)
 
                 fzf_lua.fzf_exec(formatted_items, {
                     prompt = opts.title,
-                    preview = preview_fn,
+                    fzf_opts = {
+                        ['--preview'] = preview_script .. ' {}',
+                        ['--preview-window'] = 'right:50%',
+                    },
                     actions = {
                         ['default'] = function(selected)
                             if selected and #selected > 0 then
@@ -193,6 +197,10 @@ local function get_picker_command(command, opts)
                             end
                         end,
                     },
+                    __call_on_close = function()
+                        -- Remove the temporary script
+                        os.remove(preview_script)
+                    end,
                 })
             end,
         },
