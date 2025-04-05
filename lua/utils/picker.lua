@@ -108,8 +108,10 @@ local function get_picker_command(command, opts)
                     table.insert(items, {
                         text = opts.entry_maker(item).display,
                         value = item,
-                        file = opts.preview_generator(item),
-                        -- print(vim.inspect(item))
+                        preview = {
+                            text = opts.preview_generator(item),
+                            ft = 'markdown',
+                        },
                     })
                 end
 
@@ -117,9 +119,10 @@ local function get_picker_command(command, opts)
                     items = items,
                     title = opts.title,
                     format = Snacks.picker.format.text,
+                    preview = 'preview',
                     actions = {
                         confirm = function(_, selected)
-                            if selected then
+                            if selected and selected.value then
                                 opts.selection_handler(nil, { value = selected.value })
                             end
                         end,
