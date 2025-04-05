@@ -1,4 +1,3 @@
-local os = require('os')
 local config = require('utils.config')
 local picker_provider = config.config.picker_provider
 
@@ -103,6 +102,33 @@ local function get_picker_command(command, opts)
             end,
         },
         custom = {
+            snacks = function()
+                local items = {}
+                for _, item in ipairs(opts.items) do
+                    table.insert(items, {
+                        text = opts.entry_maker(item).display,
+                        value = item,
+                    })
+                end
+
+                require('snacks.picker').pick({
+                    items = items,
+                    title = opts.title,
+                    format = function(item)
+                        return item.text
+                    end,
+                    preview = function(item)
+                        return opts.preview_generator(item.value)
+                    end,
+                    actions = {
+                        confirm = function(_, selected)
+                            if selected then
+                                opts.selection_handler(nil, { value = selected.value })
+                            end
+                        end,
+                    },
+                })
+            end,
             telescope = function()
                 require('telescope.pickers')
                     .new({}, {
@@ -128,6 +154,48 @@ local function get_picker_command(command, opts)
                         end,
                     })
                     :find()
+            end,
+            fzf_lua = function()
+                local fzf_lua = require('fzf-lua')
+
+                local formatted_items = {}
+                for _, item in ipairs(opts.items) do
+                    local entry = opts.entry_maker(item)
+                    table.insert(formatted_items, entry.display)
+                end
+
+                local item_map = {}
+                for i, item in ipairs(opts.items) do
+                    item_map[formatted_items[i]] = item
+                end
+
+                fzf_lua.fzf_exec(formatted_items, {
+                    prompt = opts.title,
+                    previewer = {
+                        _ctor = fzf_lua.shell.previewer.new,
+                        _setup = function() end,
+                        preview_window = 'right:50%',
+                        _execute = function(_, _, entry, _)
+                            if entry and entry[1] then
+                                local item = item_map[entry[1]]
+                                if item then
+                                    return opts.preview_generator(item)
+                                end
+                            end
+                            return ''
+                        end,
+                    },
+                    actions = {
+                        ['default'] = function(selected)
+                            if selected and #selected > 0 then
+                                local item = item_map[selected[1]]
+                                if item then
+                                    opts.selection_handler(nil, { value = item })
+                                end
+                            end
+                        end,
+                    },
+                })
             end,
         },
     }
