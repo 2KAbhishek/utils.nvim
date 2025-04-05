@@ -169,22 +169,20 @@ local function get_picker_command(command, opts)
                     item_map[formatted_items[i]] = item
                 end
 
+                -- Creating a simpler previewer setup that works with fzf-lua's API
+                local preview_fn = function(_, line, _)
+                    if line then
+                        local item = item_map[line]
+                        if item then
+                            return opts.preview_generator(item)
+                        end
+                    end
+                    return ''
+                end
+
                 fzf_lua.fzf_exec(formatted_items, {
                     prompt = opts.title,
-                    previewer = {
-                        _ctor = fzf_lua.shell.previewer.new,
-                        _setup = function() end,
-                        preview_window = 'right:50%',
-                        _execute = function(_, _, entry, _)
-                            if entry and entry[1] then
-                                local item = item_map[entry[1]]
-                                if item then
-                                    return opts.preview_generator(item)
-                                end
-                            end
-                            return ''
-                        end,
-                    },
+                    preview = preview_fn,
                     actions = {
                         ['default'] = function(selected)
                             if selected and #selected > 0 then
