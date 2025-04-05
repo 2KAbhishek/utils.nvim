@@ -4,6 +4,8 @@ local picker_provider = config.config.picker_provider
 ---@class Utils.Picker
 local M = {}
 
+local fzf_lua_prompt_suffix = ' '
+
 ---@return function
 local function get_picker_command(command, opts)
     local picker_commands = {
@@ -16,7 +18,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').git_files(opts)
             end,
             fzf_lua = function()
-                opts.prompt = opts.title
+                opts.prompt = opts.title .. fzf_lua_prompt_suffix
                 require('fzf-lua').git_files(opts)
             end,
         },
@@ -29,7 +31,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').find_files(opts)
             end,
             fzf_lua = function()
-                opts.prompt = opts.title
+                opts.prompt = opts.title .. fzf_lua_prompt_suffix
                 require('fzf-lua').files(opts)
             end,
         },
@@ -42,7 +44,7 @@ local function get_picker_command(command, opts)
                 require('telescope.builtin').live_grep(opts)
             end,
             fzf_lua = function()
-                opts.prompt = opts.title
+                opts.prompt = opts.title .. fzf_lua_prompt_suffix
                 require('fzf-lua').live_grep(opts)
             end,
         },
@@ -74,10 +76,8 @@ local function get_picker_command(command, opts)
                     :find()
             end,
             fzf_lua = function()
-                local fzf_lua = require('fzf-lua')
-
-                fzf_lua.fzf_exec(opts.items, {
-                    prompt = opts.title,
+                require('fzf-lua').fzf_exec(opts.items, {
+                    prompt = opts.title .. fzf_lua_prompt_suffix,
                     file_icons = true,
                     previewer = 'builtin',
                     file_skip_empty_lines = true,
@@ -143,42 +143,39 @@ local function get_picker_command(command, opts)
                     :find()
             end,
             fzf_lua = function()
-                local fzf_lua = require('fzf-lua')
-
                 local formatted_items = {}
+                local item_map = {}
                 for _, item in ipairs(opts.items) do
                     local entry = opts.entry_maker(item)
                     table.insert(formatted_items, entry.display)
+                    item_map[entry.display] = item
                 end
 
-                local item_map = {}
-                for i, item in ipairs(opts.items) do
-                    item_map[formatted_items[i]] = item
+                local CustomPreviewer = require('fzf-lua.previewer.builtin').base:extend()
+                function CustomPreviewer:new(o, preview_opts, fzf_win)
+                    CustomPreviewer.super.new(self, o, preview_opts, fzf_win)
+                    setmetatable(self, CustomPreviewer)
+                    self.item_map = item_map
+                    return self
                 end
 
-                -- Create a simple shell script that will handle previews
-                local preview_script = vim.fn.tempname()
-                local file = io.open(preview_script, 'w')
-                file:write('#!/bin/bash\n')
+                function CustomPreviewer:populate_preview_buf(entry_str)
+                    local bufnr = self:get_tmp_buffer()
+                    local item = self.item_map[entry_str]
+                    local preview_text = opts.preview_generator(item)
+                    local lines = vim.split(preview_text, '\n')
+                    vim.bo[bufnr].filetype = opts.preview_ft or 'markdown'
+                    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
-                -- Add a case statement to the script
-                file:write('case "$1" in\n')
-                for display, item in pairs(item_map) do
-                    local preview = opts.preview_generator(item):gsub('"', '\\"')
-                    file:write(string.format('    "%s")\n        echo "%s"\n        ;;\n', display, preview))
+                    self:set_preview_buf(bufnr)
+                    if self.win and type(self.win.update_scrollbar) == 'function' then
+                        self.win:update_scrollbar()
+                    end
                 end
-                file:write('    *)\n        echo "No preview available"\n        ;;\nesac\n')
-                file:close()
 
-                -- Make the script executable
-                vim.fn.system('chmod +x ' .. preview_script)
-
-                fzf_lua.fzf_exec(formatted_items, {
-                    prompt = opts.title,
-                    fzf_opts = {
-                        ['--preview'] = preview_script .. ' {}',
-                        ['--preview-window'] = 'right:50%',
-                    },
+                require('fzf-lua').fzf_exec(formatted_items, {
+                    prompt = opts.title .. fzf_lua_prompt_suffix,
+                    previewer = CustomPreviewer,
                     actions = {
                         ['default'] = function(selected)
                             if selected and #selected > 0 then
@@ -189,10 +186,6 @@ local function get_picker_command(command, opts)
                             end
                         end,
                     },
-                    __call_on_close = function()
-                        -- Remove the temporary script
-                        os.remove(preview_script)
-                    end,
                 })
             end,
         },
