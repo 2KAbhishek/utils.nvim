@@ -1,6 +1,22 @@
 local config = require('utils.config')
 local picker_provider = config.config.picker_provider
 
+---@class Utils.Picker.CommonOptions
+---@field cwd? string -- Current working directory
+---@field title? string -- Window title
+
+---@class Utils.Picker.SelectFileOptions
+---@field items string[] -- List of file paths to select from
+---@field title string -- Window title
+
+---@class Utils.Picker.CustomPickerOptions
+---@field items table -- List of items to display
+---@field title string -- Window title
+---@field entry_maker fun(item:any):table -- Converts raw items to picker entries
+---@field preview_generator fun(item:any):string -- Generates preview content as string
+---@field preview_ft? string -- File type for preview content (defaults to 'markdown')
+---@field selection_handler fun(bufnr:number|nil, selection:table) -- Handler for selection
+
 ---@class Utils.Picker
 local M = {}
 
@@ -195,6 +211,8 @@ local function get_picker_command(command, opts)
     return picker_commands[command][picker_provider]
 end
 
+---Open file picker, using git_files if in git repo, otherwise find_files
+---@param opts Utils.Picker.CommonOptions
 M.files = function(opts)
     local is_git_repo =
         vim.fn.system('cd ' .. opts.cwd .. ' && git rev-parse --is-inside-work-tree 2>/dev/null'):match('true')
@@ -205,6 +223,8 @@ M.files = function(opts)
     end)
 end
 
+---Open live grep search
+---@param opts Utils.Picker.CommonOptions
 M.live_grep = function(opts)
     vim.schedule(function()
         local picker_cmd = get_picker_command('live_grep', opts)
@@ -212,6 +232,8 @@ M.live_grep = function(opts)
     end)
 end
 
+---Open a picker to select from a list of files
+---@param opts Utils.Picker.SelectFileOptions
 M.select_file = function(opts)
     vim.schedule(function()
         local picker_cmd = get_picker_command('select_file', opts)
@@ -219,6 +241,8 @@ M.select_file = function(opts)
     end)
 end
 
+---Open a custom picker with a custom preview generator and entry maker
+---@param opts Utils.Picker.CustomPickerOptions
 M.custom = function(opts)
     vim.schedule(function()
         local picker_cmd = get_picker_command('custom', opts)
