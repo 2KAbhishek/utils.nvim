@@ -159,4 +159,11 @@ M.select_file = function(opts)
     end)
 end
 
+M.custom = function(opts)
+    vim.schedule(function()
+        local picker_cmd = get_picker_command('custom', opts)
+        picker_cmd()
+    end)
+end
+
 return M
