@@ -38,8 +38,8 @@
 
 ### ⚙️ Requirements
 
-- Latest version of `neovim`
 - `plenary.nvim`
+- `nvim-web-devicons` (optional, for language icons)
 
 ### 💻 Installation
 
@@ -53,33 +53,12 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
     'yourname/plugin.nvim',
     dependencies = {
         '2kabhishek/utils.nvim'
-    },
-},
-```
-
-#### ⚙️ Configuration
-
-`utils.nvim` can optionally be configured by specifying `opts` with Lazy or alternatively with the `setup` function like so:
-
-```lua
--- Lazy opts:
-{
-    'yourname/plugin.nvim',
-    dependencies = {
-        {
-            '2kabhishek/utils.nvim',
-            opts = {
-                -- 'telescope', 'fzf_lua', or 'snacks' (default)
-                picker_provider = "snacks",
-            }
+        opts = {
+            -- Decide picker is used by default
+            picker_provider = "snacks", -- 'telescope', 'fzf_lua', or 'snacks' (default)
         }
     },
-}
-
--- using `setup` function:
-require("utils").setup({
-    picker_provider = "telescope"
-})
+},
 ```
 
 ## 🚀 Usage
@@ -91,6 +70,7 @@ require("utils").setup({
 - `picker`: a module providing abstractions over various picker providers, supports `telescope`, `fzf_lua`, and `snacks`.
 - `cache`: a module for caching data and managing cache files.
 - `notification`: a module for simplifying notification queues.
+- `language`: a module for programming language filetype and icon management.
 - `shell`: a module for executing shell commands and opening URLs, files.
 - `json`: a module for handling JSON data.
 - `time`: a module for working with time and date.
