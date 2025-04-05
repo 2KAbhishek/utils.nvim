@@ -128,6 +128,7 @@ local function get_picker_command(command, opts)
                         previewer = require('telescope.previewers').new_buffer_previewer({
                             define_preview = function(self, entry, _)
                                 local repo_info = opts.preview_generator(entry.value)
+                                vim.bo[self.state.bufnr].filetype = opts.preview_ft or 'markdown'
                                 vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(repo_info, '\n'))
                             end,
                         }),
