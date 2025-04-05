@@ -108,18 +108,15 @@ local function get_picker_command(command, opts)
                     table.insert(items, {
                         text = opts.entry_maker(item).display,
                         value = item,
+                        file = opts.preview_generator(item),
+                        -- print(vim.inspect(item))
                     })
                 end
 
                 require('snacks.picker').pick({
                     items = items,
                     title = opts.title,
-                    format = function(item)
-                        return item.text
-                    end,
-                    preview = function(item)
-                        return opts.preview_generator(item.value)
-                    end,
+                    format = Snacks.picker.format.text,
                     actions = {
                         confirm = function(_, selected)
                             if selected then
