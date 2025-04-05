@@ -48,15 +48,10 @@ local function get_picker_command(command, opts)
         },
         select_file = {
             snacks = function()
-                local items = {}
-                for _, file in ipairs(opts.items) do
-                    table.insert(items, {
-                        text = vim.fn.fnamemodify(file, ':t'),
-                        file = file,
-                    })
-                end
                 require('snacks.picker').pick({
-                    items = items,
+                    items = vim.tbl_map(function(item)
+                        return { file = item }
+                    end, opts.items),
                     title = opts.title,
                     format = Snacks.picker.format.file,
                     actions = {
@@ -98,20 +93,17 @@ local function get_picker_command(command, opts)
         },
         custom = {
             snacks = function()
-                local items = {}
-                for _, item in ipairs(opts.items) do
-                    table.insert(items, {
-                        text = opts.entry_maker(item).display,
-                        value = item,
-                        preview = {
-                            text = opts.preview_generator(item),
-                            ft = 'markdown',
-                        },
-                    })
-                end
-
                 require('snacks.picker').pick({
-                    items = items,
+                    items = vim.tbl_map(function(item)
+                        return {
+                            text = opts.entry_maker(item).display,
+                            value = item,
+                            preview = {
+                                text = opts.preview_generator(item),
+                                ft = opts.preview_ft or 'markdown',
+                            },
+                        }
+                    end, opts.items),
                     title = opts.title,
                     format = Snacks.picker.format.text,
                     preview = 'preview',
