@@ -1,4 +1,4 @@
-*utils.txt*           For Neovim >= 0.8.0           Last change: 2025 April 05
+*utils.txt*           For Neovim >= 0.8.0           Last change: 2025 April 06
 
 ==============================================================================
 Table of Contents                                    *utils-table-of-contents*
