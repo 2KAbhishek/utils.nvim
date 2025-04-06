@@ -126,6 +126,7 @@ local function get_picker_command(command, opts)
                     actions = {
                         confirm = function(_, selected)
                             if selected and selected.value then
+                                vim.cmd('close')
                                 opts.selection_handler(nil, { value = selected.value })
                             end
                         end,
