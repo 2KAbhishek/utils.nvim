@@ -6,7 +6,7 @@ local job = require('plenary.job')
 
 local os = require('os')
 local noti = require('utils.notification')
-local picker = require('utils.picker')
+local pickme = require('pickme')
 
 ---@class Utils.Shell
 local M = {}
@@ -61,7 +61,7 @@ M.open_session_or_dir = function(dir)
         end
     end
     vim.cmd('cd ' .. dir)
-    picker.files({ cwd = dir })
+    pickme.pick('files', { cwd = dir })
 end
 
 return M
