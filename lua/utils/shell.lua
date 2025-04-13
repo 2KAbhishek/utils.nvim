@@ -6,7 +6,7 @@ local job = require('plenary.job')
 
 local os = require('os')
 local noti = require('utils.notification')
-local pickme = require('pickme')
+local utils = require('utils')
 
 ---@class Utils.Shell
 local M = {}
@@ -61,7 +61,11 @@ M.open_session_or_dir = function(dir)
         end
     end
     vim.cmd('cd ' .. dir)
-    pickme.pick('files', { cwd = dir })
+    if utils.is_available('pickme') then
+        require('pickme').pick('files', { cwd = dir })
+    else
+        vim.cmd('edit ' .. dir)
+    end
 end
 
 return M
