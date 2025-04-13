@@ -2,10 +2,7 @@
 local M = {}
 
 ---@class Utils.Config.config
----@field picker_provider string snacks | telescope | fzf_lua
-local config = {
-    picker_provider = 'snacks',
-}
+local config = {}
 
 ---@type Utils.Config.config
 M.config = config

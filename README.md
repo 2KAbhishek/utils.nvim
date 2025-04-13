@@ -28,7 +28,6 @@
 
 ## ✨ Features
 
-- **Picker Absctraction**: Offers a simple interface for popular pickers, no need to write custom picker anymore!
 - **Caching Mechanism**: Implements a caching system to store data and reduce unnecessary command execution, optimizing performance.
 - **Notification Management**: Offers functions to queue and display notifications, allowing seamless user communication within plugins.
 - **Shell Execution**: Includes capabilities to execute commands async, work with system tools, improving workflow efficiency.
@@ -53,10 +52,6 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
     'yourname/plugin.nvim',
     dependencies = {
         '2kabhishek/utils.nvim'
-        opts = {
-            -- Decide picker is used by default
-            picker_provider = "snacks", -- 'telescope', 'fzf_lua', or 'snacks' (default)
-        }
     },
 },
 ```
@@ -67,7 +62,6 @@ If you are building a plugin that requires the utilities provided by `utils.nvim
 
 `utils.nvim` is divided into several modules, each providing specific functionalities:
 
-- `picker`: a module providing abstractions over various picker providers, supports `telescope`, `fzf_lua`, and `snacks`.
 - `cache`: a module for caching data and managing cache files.
 - `notification`: a module for simplifying notification queues.
 - `language`: a module for programming language filetype and icon management.
