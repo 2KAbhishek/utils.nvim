@@ -59,15 +59,16 @@ M.open_session_or_dir = function(dir)
         if open_result == 0 then
             return
         end
+    else
+        vim.schedule(function()
+            vim.cmd('cd ' .. dir)
+            if utils.is_available('pickme') then
+                require('pickme').pick('files', { cwd = dir })
+            else
+                vim.cmd('edit ' .. dir)
+            end
+        end)
     end
-    vim.schedule(function()
-        vim.cmd('cd ' .. dir)
-        if utils.is_available('pickme') then
-            require('pickme').pick('files', { cwd = dir })
-        else
-            vim.cmd('edit ' .. dir)
-        end
-    end)
 end
 
 return M
