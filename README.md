@@ -37,7 +37,6 @@
 
 ### ⚙️ Requirements
 
-- `plenary.nvim`
 - `nvim-web-devicons` (optional, for language icons)
 
 ### 💻 Installation

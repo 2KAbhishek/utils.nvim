@@ -1,9 +1,3 @@
----@class job
----@field new fun(self: job, config: table): job
----@field start fun(self: job): job
----@field result fun(self: job): string[]
-local job = require('plenary.job')
-
 local os = require('os')
 local noti = require('utils.notification')
 local utils = require('utils')
@@ -16,18 +10,39 @@ M.inside_tmux = vim.env.TMUX ~= nil
 ---@param command string
 ---@param callback fun(result: string)
 M.async_shell_execute = function(command, callback)
-    job:new({
-        command = vim.fn.has('win32') == 1 and 'cmd' or 'sh',
-        args = vim.fn.has('win32') == 1 and { '/c', command } or { '-c', command },
-        on_exit = function(j, return_val)
-            local result = j:result()
-            local output = type(result) == 'table' and table.concat(result, '\n') or tostring(result)
+    local cmd = vim.fn.has('win32') == 1 and { 'cmd', '/c', command } or { 'sh', '-c', command }
+    local stdout = {}
+    local stderr = {}
 
-            if return_val ~= 0 then
-                local error_output = j:stderr_result()
-                error_output = type(error_output) == 'table' and table.concat(error_output, '\n')
-                    or tostring(error_output)
+    vim.fn.jobstart(cmd, {
+        stdout_buffered = true,
+        stderr_buffered = true,
+        on_stdout = function(_, data)
+            if data then
+                for _, line in ipairs(data) do
+                    table.insert(stdout, line)
+                end
+            end
+        end,
+        on_stderr = function(_, data)
+            if data then
+                for _, line in ipairs(data) do
+                    table.insert(stderr, line)
+                end
+            end
+        end,
+        on_exit = function(_, exit_code)
+            while #stdout > 0 and stdout[#stdout] == '' do
+                table.remove(stdout)
+            end
+            while #stderr > 0 and stderr[#stderr] == '' do
+                table.remove(stderr)
+            end
 
+            local output = table.concat(stdout, '\n')
+
+            if exit_code ~= 0 then
+                local error_output = table.concat(stderr, '\n')
                 local error_message =
                     string.format('Error executing:\n%s\n\nDetails:\n%s\n%s', command, output, error_output)
                 noti.queue_notification(error_message, vim.log.levels.ERROR)
@@ -35,7 +50,7 @@ M.async_shell_execute = function(command, callback)
             end
             callback(output)
         end,
-    }):start()
+    })
 end
 
 ---@param command string

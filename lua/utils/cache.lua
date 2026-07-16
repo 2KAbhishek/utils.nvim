@@ -1,13 +1,4 @@
----@class path
----@field new fun(self: path, ...): path
----@field exists fun(self: path): boolean
----@field read fun(self: path): string
----@field write fun(self: path, content: string, mode: string): nil
----@field mkdir fun(self: path, opts: table): nil
----@field joinpath fun(self: path, path: string): path
----@field rm fun(self: path, opts: table): nil
----@field absolute fun(self: path): string
-local path = require('plenary.path')
+
 
 local os = require('os')
 
@@ -18,41 +9,54 @@ local shell = require('utils.shell')
 ---@class Utils.Cache
 local M = {}
 
----@return path
+---@return string
 local function get_cache_dir()
     local cache_dir = vim.fn.stdpath('cache')
-    return path:new(cache_dir, 'utils-nvim-cache')
+    local result = cache_dir .. '/utils-nvim-cache'
+    if vim.fs and vim.fs.normalize then
+        return vim.fs.normalize(result)
+    else
+        return result:gsub('\\', '/'):gsub('//+', '/')
+    end
 end
 
 ---@param cache_key string
----@return path
+---@return string
 local function get_cache_file_path(cache_key)
     local cache_dir = get_cache_dir()
-    cache_dir:mkdir({ parents = true, exists_ok = true })
-    return cache_dir:joinpath(cache_key .. '.json')
+    vim.fn.mkdir(cache_dir, 'p')
+    return cache_dir .. '/' .. cache_key .. '.json'
 end
 
----@param cache_file path
+---@param cache_file string
 ---@return {time: number, data: any}|nil
 local function read_cache_file(cache_file)
-    if cache_file:exists() then
-        local content = cache_file:read()
-        local cache_data = json.safe_json_decode(content)
-        if cache_data and cache_data.time and cache_data.data then
-            return cache_data
+    if vim.fn.filereadable(cache_file) ~= 0 then
+        local f = io.open(cache_file, 'r')
+        if f then
+            local content = f:read('*a')
+            f:close()
+            local cache_data = json.safe_json_decode(content)
+            if cache_data and cache_data.time and cache_data.data then
+                return cache_data
+            end
         end
     end
     return nil
 end
 
----@param cache_file path
+---@param cache_file string
 ---@param data any
 local function write_cache_file(cache_file, data)
     local cache_data = {
         time = os.time(),
         data = data,
     }
-    cache_file:write(vim.json.encode(cache_data), 'w')
+    local f = io.open(cache_file, 'w')
+    if f then
+        f:write(vim.json.encode(cache_data))
+        f:close()
+    end
 end
 
 ---@param cache_key string
@@ -79,11 +83,11 @@ end
 ---@param prefix string
 M.clear_cache = function(prefix)
     local cache_dir = get_cache_dir()
-    if not cache_dir:exists() then
+    if vim.fn.isdirectory(cache_dir) == 0 then
         return
     end
 
-    local matching_files = vim.fn.globpath(cache_dir:absolute(), prefix .. '*', false, true)
+    local matching_files = vim.fn.globpath(cache_dir, prefix .. '*', false, true)
 
     if #matching_files == 0 then
         noti.queue_notification('No cache items found matching: ' .. prefix, nil, 'Utils')
